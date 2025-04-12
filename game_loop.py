@@ -6,9 +6,9 @@ if len(sys.argv) != 4:
     print("Usage: py game_loop.py --game_id --team_id --depth")
     sys.exit()
 
-game_id = sys.argv[1]
-team_id = sys.argv[2]
-depth = sys.argv[3]
+game_id = int(sys.argv[1])
+team_id = int(sys.argv[2])
+depth = int(sys.argv[3])
 
 
 
