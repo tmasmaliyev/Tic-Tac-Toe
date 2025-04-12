@@ -1,9 +1,9 @@
 import api
 from main import *
 
-game_id = 5259
+game_id = 5263
 team_id = 1455
-depth = 6
+depth = 5
 
 
 
@@ -15,7 +15,7 @@ print(f"\ttarget: {game_details['target']}\n\tstatus: {game_details['status']}\n
 n = int(game_details['boardsize'])
 m = int(game_details['target'])
 game_state = GameState(n, m)
-game_state.board = api.transform_to_grid(api.get_board_map(game_id), n, n)
+game_state.board = api.transform_to_grid(board_map, n, n)
 player_icon = 'O' if int(game_details['team1id']) == team_id else 'X'
 
 if int(game_details['turnteamid']) == team_id:
@@ -27,9 +27,9 @@ is_team_turn = int(game_details['turnteamid']) == team_id
 
 while True:
     print("INFO: Current board state:")
-    print(api.get_board_string(game_id))
+    game_state.print_board()
     while not is_team_turn:
-        print("INFO: Waiting for the other time to move...")
+        print("INFO: Waiting for the other team to move...")
         print("INFO: If they have played, write 1 :")
         resp = input()
         if(int(resp) == 1):
@@ -39,10 +39,11 @@ while True:
             else:
                 board_map_played = api.get_board_map(game_id)
                 played_move = api.find_new_key(board_map_played, board_map)
+                board_map = board_map_played.copy()
                 game_state = game_state.make_move(*played_move)
                 print(f"INFO: The other team has played on {played_move[0]},{played_move[1]}")
                 print("INFO: Current board state:")
-                print(api.get_board_string(game_id))
+                game_state.print_board()
                 break
 
     print("INFO: Its your turn. Waiting for the heurestic function to recommend a move...")

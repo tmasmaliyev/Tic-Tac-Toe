@@ -57,7 +57,7 @@ def check_win(gameId: int, teamId: int):
 def check_draw(gameId: int):
     game_details = get_game_details(gameId)
     board_size = int(game_details['boardsize'])
-    return board_size * board_size == game_details['moves']
+    return board_size * board_size == int(game_details['moves'])
 
 
 def get_board_string(gameId: int):
