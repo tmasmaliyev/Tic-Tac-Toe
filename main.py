@@ -144,7 +144,7 @@ def play(n = 5, m = 4, depth = 4):
         state.print_board()
 
         _, move = minimax(state, depth, -math.inf, math.inf, True, state.current_player)
-
+        print(move)
         if move is None:
             print("No moves left.")
             break
@@ -163,4 +163,8 @@ def play(n = 5, m = 4, depth = 4):
         print("Draw!")
 
 if __name__ == '__main__':
-    play(n=5, m=5, depth=6)
+    # play(n=3, m=3, depth=6)
+    state = GameState(3, 3)
+    _, move = minimax(state, 6, -math.inf, math.inf, True, state.current_player)
+    move_req = f"{move[0]},{move[1]}"
+    print(move_req)

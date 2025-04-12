@@ -56,7 +56,7 @@ def check_win(gameId: int, teamId: int):
 
 def check_draw(gameId: int):
     game_details = get_game_details(gameId)
-    board_size = game_details['boardSize']
+    board_size = int(game_details['boardsize'])
     return board_size * board_size == game_details['moves']
 
 
@@ -68,6 +68,8 @@ def get_board_string(gameId: int):
 def get_board_map(gameId: int):
     params = {"type": "boardMap", "gameId": gameId}
     response = send_request(HTTPMethod.GET, None, params)
+    if response['output'] is None:
+        return
     return json.loads(response['output'])
 
 def make_move(gameId: int, teamId: int, move: str):
@@ -76,3 +78,18 @@ def make_move(gameId: int, teamId: int, move: str):
     if response is not None:
         print(f"INFO: Team({teamId}) move on {move}")
     return response
+
+def transform_to_grid(input_dict, rows=3, cols=3):
+    grid = [['.' for _ in range(cols)] for _ in range(rows)]
+    if input_dict is None:
+        return grid
+    for key, value in input_dict.items():
+        r, c = map(int, key.split(','))
+        grid[r][c] = value
+    return grid
+
+
+def find_new_key(dict1, dict2):
+    key = (set(dict1) - set(dict2)).pop()
+    return tuple(map(int, key.split(',')))
+
