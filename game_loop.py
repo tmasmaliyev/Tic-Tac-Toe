@@ -1,9 +1,14 @@
 import api
 from main import *
+import sys
 
-game_id = 5275
-team_id = 1455
-depth = 5
+if len(sys.argv) != 4:
+    print("Usage: py game_loop.py --game_id --team_id --depth")
+    sys.exit()
+
+game_id = sys.argv[1]
+team_id = sys.argv[2]
+depth = sys.argv[3]
 
 
 
