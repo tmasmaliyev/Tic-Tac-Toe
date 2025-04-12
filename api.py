@@ -47,10 +47,11 @@ def isTeamsTurn(gameId: int, teamId: int):
 def check_win(gameId: int, teamId: int):
     game_details = get_game_details(gameId)
     winner_team_id = game_details['winnerteamid']
+    if winner_team_id == None:
+        return 0
+    winner_team_id = int(winner_team_id)
     if winner_team_id == teamId:
         return 1
-    elif winner_team_id == None:
-        return 0
     else:
         return -1
 
@@ -69,7 +70,7 @@ def get_board_map(gameId: int):
     params = {"type": "boardMap", "gameId": gameId}
     response = send_request(HTTPMethod.GET, None, params)
     if response['output'] is None:
-        return
+        return dict()
     return json.loads(response['output'])
 
 def make_move(gameId: int, teamId: int, move: str):

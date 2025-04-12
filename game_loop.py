@@ -1,7 +1,7 @@
 import api
 from main import *
 
-game_id = 5263
+game_id = 5273
 team_id = 1455
 depth = 5
 
@@ -61,7 +61,8 @@ while True:
         move_resp = api.make_move(game_id, team_id, inp_move)
         move  = tuple(map(int, inp_move.split(',')))
     game_state = game_state.make_move(*move)
-
+    board_map = api.get_board_map(game_id)
+    game_state.print_board()
     print(f"INFO: Checking for win...")
     win = api.check_win(game_id, team_id)
     if win == 1:
