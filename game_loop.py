@@ -1,7 +1,7 @@
 import api
 from main import *
 
-game_id = 5273
+game_id = 5275
 team_id = 1455
 depth = 5
 
@@ -35,6 +35,11 @@ while True:
         if(int(resp) == 1):
             is_team_turn = api.isTeamsTurn(game_id, team_id)
             if not is_team_turn:
+                is_won = api.check_win(game_id, team_id)
+                if(is_won == -1):
+                    print(api.get_board_string(game_id))
+                    print("INFO: The other team has won the game.")
+                    break
                 print("INFO: It seems like they haven't played yet.")
             else:
                 board_map_played = api.get_board_map(game_id)
