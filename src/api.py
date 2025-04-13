@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import json
 from http import HTTPMethod
 
+from board import State
+
 
 load_dotenv()
 
@@ -81,12 +83,13 @@ def make_move(gameId: int, teamId: int, move: str):
     return response
 
 def transform_to_grid(input_dict, rows=3, cols=3):
-    grid = [['.' for _ in range(cols)] for _ in range(rows)]
+    grid = [[State.Blank for _ in range(cols)] for _ in range(rows)]
     if input_dict is None:
         return grid
     for key, value in input_dict.items():
         r, c = map(int, key.split(','))
-        grid[r][c] = value
+        player = State.X if value == 'X' else State.O
+        grid[r][c] = player
     return grid
 
 

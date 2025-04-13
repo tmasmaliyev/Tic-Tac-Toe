@@ -1,6 +1,8 @@
+from math import inf
 import api
-from main import *
 import sys
+from board import Board
+from minimax import Minimax
 
 if len(sys.argv) != 4:
     print("Usage: py game_loop.py --game_id --team_id --depth")
@@ -19,20 +21,21 @@ board_map = api.get_board_map(game_id)
 print(f"\ttarget: {game_details['target']}\n\tstatus: {game_details['status']}\n\twinnerTeamId: {game_details['winnerteamid']}\n\tturnTeamId: {game_details['turnteamid']}")
 n = int(game_details['boardsize'])
 m = int(game_details['target'])
-game_state = GameState(n, m)
+game_state = Board(n, m)
 game_state.board = api.transform_to_grid(board_map, n, n)
+game_state.moves_count = int(game_details['moves'])
 player_icon = 'O' if int(game_details['team1id']) == team_id else 'X'
 
 if int(game_details['turnteamid']) == team_id:
     if player_icon == 'O':
-        game_state.switch_player()
+        game_state.switch_turn()
 
 
 is_team_turn = int(game_details['turnteamid']) == team_id
 
 while True:
     print("INFO: Current board state:")
-    game_state.print_board()
+    game_state.draw_board()
     while not is_team_turn:
         print("INFO: Waiting for the other team to move...")
         print("INFO: If they have played, write 1 :")
@@ -50,17 +53,26 @@ while True:
                 board_map_played = api.get_board_map(game_id)
                 played_move = api.find_new_key(board_map_played, board_map)
                 board_map = board_map_played.copy()
-                game_state = game_state.make_move(*played_move)
+                game_state.move(game_state.board_position_to_index(played_move[0], played_move[1]))
                 print(f"INFO: The other team has played on {played_move[0]},{played_move[1]}")
                 print("INFO: Current board state:")
-                game_state.print_board()
+                game_state.draw_board()
                 break
 
     print("INFO: Its your turn. Waiting for the heurestic function to recommend a move...")
-    _, move = minimax(game_state, depth, -math.inf, math.inf, True, game_state.current_player)
-    if move is None:
+    move_idx = -1
+    Minimax.max_depth = depth
+    if game_state.moves_count == 0:
+        if game_state.board_width % 2 == 1:
+            move_idx = game_state.num_elements // 2
+        else:
+            move_idx = game_state.num_elements // 2 - game_state.board_width // 2 - 1
+    else:
+        move_idx, _ = Minimax.minimax(game_state, game_state.player_turn, 0, -inf, inf)
+    if move_idx == -1:
         print("INFO: There are no moves left to play.")
         break
+    move = game_state.index_to_board_position(move_idx)
     move_req = f"{move[0]},{move[1]}"
     print(f"INFO: Preparing to play at {move_req}")
 
@@ -70,9 +82,9 @@ while True:
         inp_move = input()
         move_resp = api.make_move(game_id, team_id, inp_move)
         move  = tuple(map(int, inp_move.split(',')))
-    game_state = game_state.make_move(*move)
+    game_state.move(game_state.board_position_to_index(move[0], move[1]))
     board_map = api.get_board_map(game_id)
-    game_state.print_board()
+    game_state.draw_board()
     print(f"INFO: Checking for win...")
     win = api.check_win(game_id, team_id)
     if win == 1:
