@@ -1,8 +1,7 @@
 from board import Board, State
 from math import inf
 
-from typing import List
-import random
+from typing import Tuple, List, Optional
 
 class Minimax:
     @classmethod
@@ -19,7 +18,9 @@ class Minimax:
             else:
                 board.move(board.num_elements // 2 - board.board_width // 2 - 1)
         else:
-            cls.minimax(board, player, 0, -inf, inf)
+            best_move, _ = cls.minimax(board, player, 0, -inf, inf)
+
+            board.move(best_move)
 
     @classmethod
     def minimax(
@@ -29,17 +30,17 @@ class Minimax:
         depth: int,
         alpha: float,
         beta: float,
-    ) -> float:
+    ) -> Tuple[Optional[int], float]:
         if board.game_over:
             if board.winner == board.player_turn:
-                return 1e12 - depth
+                return None, 1e12 - depth
             elif board.winner != board.player_turn:
-                return -depth - 1e12
+                return None, -depth - 1e12
             else:
-                return 0
+                return None, 0
 
         if depth == cls.max_depth:
-            return cls.score(board, player)
+            return None, cls.score(board, player)
 
         depth += 1
 
@@ -51,7 +52,7 @@ class Minimax:
     @classmethod
     def maximize(
         cls, board: Board, player: State, depth: int, alpha: float, beta: float
-    ) -> float:
+    ) -> Tuple[int, float]:
         best_move = -1
 
         available_moves = board.get_available_moves()
@@ -60,7 +61,7 @@ class Minimax:
             temp_board = board.deepcopy()
             temp_board.move(the_move)
 
-            score = cls.minimax(temp_board, player, depth, alpha, beta)
+            _, score = cls.minimax(temp_board, player, depth, alpha, beta)
 
             if score > alpha:
                 alpha = score
@@ -69,15 +70,15 @@ class Minimax:
             if alpha > beta:
                 break
 
-        if best_move != -1:
-            board.move(best_move)
+        # if best_move != -1:
+        #     board.move(best_move)
 
-        return alpha
+        return best_move, alpha
 
     @classmethod
     def minimize(
         cls, board: Board, player: State, depth: int, alpha: float, beta: float
-    ) -> float:
+    ) -> Tuple[int, float]:
         best_move = -1
         available_moves = board.get_available_moves()
         # random.shuffle(available_moves)
@@ -86,7 +87,7 @@ class Minimax:
             temp_board = board.deepcopy()
             temp_board.move(the_move)
 
-            score = cls.minimax(temp_board, player, depth, alpha, beta)
+            _, score = cls.minimax(temp_board, player, depth, alpha, beta)
 
             if score < beta:
                 beta = score
@@ -95,10 +96,10 @@ class Minimax:
             if alpha > beta:
                 break
 
-        if best_move != -1:
-            board.move(best_move)
+        # if best_move != -1:
+        #     board.move(best_move)
 
-        return beta
+        return best_move, beta
     
     @classmethod
     def score(cls, board : Board, player : State) -> int:
