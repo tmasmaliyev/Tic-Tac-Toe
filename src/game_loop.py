@@ -1,6 +1,7 @@
 from math import inf
 import api
 import sys
+import time
 from board import Board
 from minimax import Minimax
 
@@ -11,8 +12,6 @@ if len(sys.argv) != 4:
 game_id = int(sys.argv[1])
 team_id = int(sys.argv[2])
 depth = int(sys.argv[3])
-
-
 
 print("INFO: Starting the loop.")
 print("INFO: Game details:")
@@ -30,36 +29,34 @@ if int(game_details['turnteamid']) == team_id:
     if player_icon == 'O':
         game_state.switch_turn()
 
-
 is_team_turn = int(game_details['turnteamid']) == team_id
 
 while True:
     print("INFO: Current board state:")
     game_state.draw_board()
+
     while not is_team_turn:
         print("INFO: Waiting for the other team to move...")
-        print("INFO: If they have played, write 1 :")
-        resp = input()
-        if(int(resp) == 1):
-            is_team_turn = api.isTeamsTurn(game_id, team_id)
-            if not is_team_turn:
-                is_won = api.check_win(game_id, team_id)
-                if(is_won == -1):
-                    print(api.get_board_string(game_id))
-                    print("INFO: The other team has won the game.")
-                    break
-                print("INFO: It seems like they haven't played yet.")
-            else:
-                board_map_played = api.get_board_map(game_id)
-                played_move = api.find_new_key(board_map_played, board_map)
-                board_map = board_map_played.copy()
-                game_state.move(game_state.board_position_to_index(played_move[0], played_move[1]))
-                print(f"INFO: The other team has played on {played_move[0]},{played_move[1]}")
-                print("INFO: Current board state:")
-                game_state.draw_board()
-                break
+        time.sleep(1)
+        is_team_turn = api.isTeamsTurn(game_id, team_id)
 
-    print("INFO: Its your turn. Waiting for the heurestic function to recommend a move...")
+        if not is_team_turn:
+            is_won = api.check_win(game_id, team_id)
+            if is_won == -1:
+                print(api.get_board_string(game_id))
+                print("INFO: The other team has won the game.")
+                sys.exit()
+        else:
+            board_map_played = api.get_board_map(game_id)
+            played_move = api.find_new_key(board_map_played, board_map)
+            board_map = board_map_played.copy()
+            game_state.move(game_state.board_position_to_index(played_move[0], played_move[1]))
+            print(f"INFO: The other team has played on {played_move[0]},{played_move[1]}")
+            print("INFO: Current board state:")
+            game_state.draw_board()
+            break
+
+    print("INFO: It's your turn. Waiting for the heuristic function to recommend a move...")
     move_idx = -1
     Minimax.max_depth = depth
     if game_state.moves_count == 0:
@@ -81,11 +78,13 @@ while True:
         print("ERROR: There was a problem playing the move. Please enter the move manually: ")
         inp_move = input()
         move_resp = api.make_move(game_id, team_id, inp_move)
-        move  = tuple(map(int, inp_move.split(',')))
+        move = tuple(map(int, inp_move.split(',')))
+
     game_state.move(game_state.board_position_to_index(move[0], move[1]))
     board_map = api.get_board_map(game_id)
     game_state.draw_board()
-    print(f"INFO: Checking for win...")
+
+    print("INFO: Checking for win...")
     win = api.check_win(game_id, team_id)
     if win == 1:
         print("INFO: You have won the game. Congratulations!")
@@ -99,5 +98,6 @@ while True:
             print("INFO: The game has ended in a draw.")
             break
         else:
-            print("INFO: The game is stil ongoing.")
-    is_team_turn = api.isTeamsTurn(game_id, team_id)
+            print("INFO: The game is still ongoing.")
+
+    is_team_turn = False
