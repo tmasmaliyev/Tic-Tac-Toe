@@ -39,9 +39,12 @@ while True:
         print("INFO: Waiting for the other team to move...")
         time.sleep(1)
         is_team_turn = api.isTeamsTurn(game_id, team_id)
+        print(f"INFO: Calling isTeamsTurn with game_id = {game_id}, team_id = {team_id}, result = {is_team_turn}")
 
         if not is_team_turn:
+            print("DEBUG: Calling check_win...")
             is_won = api.check_win(game_id, team_id)
+            print(f"DEBUG: check_win returned: {is_won}")
             if is_won == -1:
                 print(api.get_board_string(game_id))
                 print("INFO: The other team has won the game.")

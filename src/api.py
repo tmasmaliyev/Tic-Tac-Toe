@@ -20,42 +20,55 @@ headers = {
 }
 
 def send_request(method: HTTPMethod, data: dict, params: dict):
-    if method == HTTPMethod.GET:
-        response = requests.get(url=api_url, headers=headers, data=data, params=params)
-    elif method == HTTPMethod.POST:
-        response = requests.post(url=api_url, headers=headers, data=data, params=params)
-    else:
-        print("Unimplemented method type.")
-    if response.text == "":
-        return
-    resp_json = json.loads(response.text)
-    if(resp_json["code"] == "FAIL"):
-        print(resp_json["message"])
-        return
-    return resp_json
+    try:
+        if method == HTTPMethod.GET:
+            response = requests.get(url=api_url, headers=headers, data=data, params=params, timeout=15)
+        elif method == HTTPMethod.POST:
+            response = requests.post(url=api_url, headers=headers, data=data, params=params, timeout=15)
+        else:
+            print("Unimplemented method type.")
+        if response.text == "":
+            return
+        resp_json = json.loads(response.text)
+        if(resp_json["code"] == "FAIL"):
+            print(resp_json["message"])
+            return
+        return resp_json
+    except requests.exceptions.Timeout as e:
+        print("ERROR: The request timed out after 15 seconds.")
+        return {}
+
 
 def get_game_details(gameId: int):
-    params = {"type":"gameDetails", "gameId": gameId}
-    response = send_request(HTTPMethod.GET, None, params)
-    if(response['game'] == '{}'):
-        print("ERROR in get_game_details: Invalid gameId")
-        return
-    return json.loads(response['game'])
+    try:
+        params = {"type":"gameDetails", "gameId": gameId}
+        response = send_request(HTTPMethod.GET, None, params)
+        if(response['game'] == '{}'):
+            print("ERROR in get_game_details: Invalid gameId")
+            return
+        return json.loads(response['game'])
+    except Exception as e:
+        print(e)
 
 def isTeamsTurn(gameId: int, teamId: int):
     game_details = get_game_details(gameId)
+    print(game_details)
     return int(game_details['turnteamid']) == teamId
 
 def check_win(gameId: int, teamId: int):
-    game_details = get_game_details(gameId)
-    winner_team_id = game_details['winnerteamid']
-    if winner_team_id == None:
-        return 0
-    winner_team_id = int(winner_team_id)
-    if winner_team_id == teamId:
-        return 1
-    else:
-        return -1
+    try:
+        game_details = get_game_details(gameId)
+        winner_team_id = game_details['winnerteamid']
+        if winner_team_id == None:
+            return 0
+        winner_team_id = int(winner_team_id)
+        if winner_team_id == teamId:
+            return 1
+        else:
+            return -1
+    except Exception as e:
+        print("ERROR: Exception in check_win.")
+        print(e)
 
 def check_draw(gameId: int):
     game_details = get_game_details(gameId)
