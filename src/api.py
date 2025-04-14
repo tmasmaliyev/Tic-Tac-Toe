@@ -67,6 +67,7 @@ def check_win(gameId: int, teamId: int):
         else:
             return -1
     except Exception as e:
+        print("ERROR: Exception in check_win.")
         print(e)
 
 def check_draw(gameId: int):
