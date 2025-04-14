@@ -4,8 +4,8 @@ from typing import List
 import sys
 
 def main(args: List[str]) -> None:
-    board_width = 5
-    num_marks_to_win = 3
+    board_width = 8
+    num_marks_to_win = 5
 
     if len(args) > 2:
         board_width, num_marks_to_win = map(int, args[1:3])
